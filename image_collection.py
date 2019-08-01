@@ -10,9 +10,9 @@ This file is part of AirSimTensorFlow
 MIT License
 '''
 
-from AirSimClient import CarClient, CarControls, ImageRequest, AirSimImageType, AirSimClientBase
 from image_helper import IMAGEDIR
 import pprint
+import airsim
 import os
 import time
 
@@ -26,11 +26,11 @@ except:
     os.mkdir(IMAGEDIR)
     
 # connect to the AirSim simulator 
-client = CarClient()
+client = airsim.CarClient()
 client.confirmConnection()
 print('Connected')
 client.enableApiControl(True)
-car_controls = CarControls()
+car_controls = airsim.CarControls()
 
 client.reset()
 
@@ -44,7 +44,8 @@ imagequeue = []
 while True:
 
     # get RGBA camera images from the car
-    responses = client.simGetImages([ImageRequest(1, AirSimImageType.Scene)])  
+    responses = client.simGetImages([airsim.ImageRequest(1,
+        airsim.ImageType.Scene)])  
 
     # add image to queue        
     imagequeue.append(responses[0].image_data_uint8)
@@ -52,10 +53,10 @@ while True:
     # dump queue when it gets full
     if len(imagequeue) == QUEUESIZE:
         for i in range(QUEUESIZE):
-            AirSimClientBase.write_file(os.path.normpath(IMAGEDIR + '/image%03d.png'  % i ), imagequeue[i])
+            airsim.write_file(os.path.normpath(IMAGEDIR + '/image%03d.png'  % i ), imagequeue[i])
         imagequeue.pop(0)    
 
-    collision_info = client.getCollisionInfo()
+    collision_info = client.simGetCollisionInfo()
 
     if collision_info.has_collided:
         print("Collision at pos %s, normal %s, impact pt %s, penetration %f, name %s, obj id %d" % (
