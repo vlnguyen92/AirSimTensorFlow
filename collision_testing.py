@@ -10,8 +10,8 @@ This file is part of AirSimTensorFlow
 MIT License
 '''
 
-from AirSimClient import CarClient, CarControls, ImageRequest, AirSimImageType, AirSimClientBase
 import os
+import airsim
 import time
 import tensorflow as tf
 import pickle
@@ -27,11 +27,11 @@ INITIAL_THROTTLE= 0.65
 BRAKING_DURATION = 15
 
 # connect to the AirSim simulator 
-client = CarClient()
+client = airsim.CarClient()
 client.confirmConnection()
 print('Connected')
 client.enableApiControl(True)
-car_controls = CarControls()
+car_controls = airsim.CarControls()
 
 client.reset()
 
@@ -64,11 +64,12 @@ with tf.Graph().as_default():
     while True:
 
         # Get RGBA camera images from the car
-        responses = client.simGetImages([ImageRequest(1, AirSimImageType.Scene)])
+        responses = client.simGetImages([airsim.ImageRequest(1,
+            airsim.ImageType.Scene)])
 
         # Save it to a temporary file
         image = responses[0].image_data_uint8
-        AirSimClientBase.write_file(os.path.normpath(TMPFILE), image)
+        airsim.write_file(os.path.normpath(TMPFILE), image)
 
         # Read-load the image as a grayscale array
         image = loadgray(TMPFILE)
